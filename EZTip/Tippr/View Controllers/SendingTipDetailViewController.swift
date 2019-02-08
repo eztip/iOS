@@ -31,7 +31,7 @@ class SendingTipDetailViewController: UIViewController {
             tipLabel.text = "You did not enter a tip, please return to the previous screen to enter a tip."
             return
         }
-        tipLabel.text = "You are about to send a tip to Cameron Dunn for $\(tipToSend ?? "0.00")."
+        tipLabel.text = "You are about to send a tip to \(worker?.username ?? "Unknown") for $\(tipToSend ?? "0.00")."
     }
     
     
@@ -41,6 +41,7 @@ class SendingTipDetailViewController: UIViewController {
         let tip = Tip(workerID: newWorker.id, tipAmount: tipInt)
         controller.addTip(tip: tip, token: loggedInToken!) { (error) in
             print("Successfully sent tip")
+            self.navigationController?.popToRootViewController(animated: true)
         }
     }
     /*

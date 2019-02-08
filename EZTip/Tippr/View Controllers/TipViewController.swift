@@ -53,6 +53,7 @@ class TipViewController: UIViewController, UITableViewDelegate, UITableViewDataS
         
     }
     
+    
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         refineList()
         tableView.reloadData()
@@ -90,7 +91,16 @@ class TipViewController: UIViewController, UITableViewDelegate, UITableViewDataS
     
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if(refinedArray.count > 0){
+            workerSelected = refinedArray[indexPath.row].worker!
+        }else{
+            workerSelected = controller.workersWithImages[indexPath.row].worker!
+        }
+        workerEntry.resignFirstResponder()
         tableView.isHidden = true
+        workerEntry.text = "\(workerSelected.username)"
+        closeButton.isHidden = true
+        
     }
     
     override func viewDidLoad() {
@@ -211,5 +221,6 @@ class TipViewController: UIViewController, UITableViewDelegate, UITableViewDataS
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let destination = segue.destination as! SendingTipDetailViewController
         destination.tipToSend = tipAmount
+        destination.worker = workerSelected
     }
 }
