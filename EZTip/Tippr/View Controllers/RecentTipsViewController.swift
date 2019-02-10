@@ -25,7 +25,7 @@ class RecentTipsViewController: UIViewController, UITableViewDelegate, UITableVi
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") as! TipTableViewCell
         cell.nameLabel.text = controller.tipsWithSender[indexPath.row].sender.worker?.username
-        cell.tipLabel.text = "\(controller.tipsWithSender[indexPath.row].tip?.tipAmount ?? 0)"
+        cell.tipLabel.text = "$\(controller.tipsWithSender[indexPath.row].tip?.tipAmount ?? 0)"
         cell.profileImage.image = UIImage(data: controller.tipsWithSender[indexPath.row].sender.imageData)
         return cell
     }
@@ -33,6 +33,7 @@ class RecentTipsViewController: UIViewController, UITableViewDelegate, UITableVi
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = 100
         guard let username = loggedInToken?.username else {
             welcomeLabel.text = "Welcome to Tippr"
             return

@@ -27,6 +27,7 @@ struct Worker : Codable{
     var lastName : String
     var occupation : String
     var userType : String
+    var tips : [TipResponse] = []
     
     init(){
         id = Int()

@@ -15,12 +15,9 @@ class Controller{
     
     
     
-    var tips : [TipResponse]?
-    var tipsWithSender : [TipWithSender] = []{
-        didSet{
-            print("Set tipsWithSender")
-        }
-    }
+    var tips : [TipResponse] = []
+    var tipsWithSender : [TipWithSender] = []
+    var currentWorker : Worker?
     var workers : [Worker]?
     var workersWithImages : [WorkerWithImage] = []
     var wasError : Bool = false
@@ -114,6 +111,7 @@ class Controller{
     
     
     func addTip(tip: Tip, token : Token, completion: @escaping (Error?) -> Void){
+        //Add who is sending the tip.
         let url = baseURL.appendingPathComponent("tips")
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
@@ -157,9 +155,7 @@ class Controller{
     }
     
     func getWorkerInfo(token: Token, completion: @escaping (Error?) -> Void){
-        guard let safeTips = tips else {return}
-        for x in safeTips{
-            let url = baseURL.appendingPathComponent("workers/\(x.workerID)")
+        let url = baseURL.appendingPathComponent("workers/\(currentWorker?.id ?? 1)")
             var urlRequest = URLRequest(url: url)
             urlRequest.httpMethod = "GET"
             
@@ -178,21 +174,21 @@ class Controller{
                     }catch{
                         print(error)
                     }
+                    var imageData : Data?
+                    do{
+                        if(tipWithSender.sender.worker != nil){
+                            imageData = try Data(contentsOf: URL(string: (tipWithSender.sender.worker!.profilePhoto))!)
+                        }
+                    }catch{
+                        print(error)
+                    }
+                    if(imageData != nil){
+                        tipWithSender.sender.imageData = imageData!
+                    }
+                    self.tipsWithSender.append(tipWithSender)
                 }
                 completion(nil)
             }.resume()
-            var imageData : Data?
-            do{
-                if(tipWithSender.sender.worker != nil){
-                    imageData = try Data(contentsOf: URL(string: (tipWithSender.sender.worker!.profilePhoto))!)
-                }
-            }catch{
-                print(error)
-            }
-            guard let safeData = imageData else {continue}
-            tipWithSender.sender.imageData = safeData
-            tipWithSender.tip = x
-        }
     }
     
     
@@ -216,8 +212,16 @@ class Controller{
                     print(error)
                 }
             }
+            self.findCurrentWorker()
             self.fetchImages(completion: completion)
         }.resume()
+    }
+    func findCurrentWorker(){
+        for x in workers!{
+            if(x.username == loggedInToken?.username){
+                currentWorker = x
+            }
+        }
     }
     
     
