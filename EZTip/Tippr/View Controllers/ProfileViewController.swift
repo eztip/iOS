@@ -10,24 +10,20 @@ import UIKit
 import Photos
 
 class ProfileViewController: UIViewController, UIImagePickerControllerDelegate, UITextFieldDelegate, UINavigationControllerDelegate {
-    @IBOutlet weak var employmentEntry: UITextField!
+    @IBOutlet weak var occupationEntry: UITextField!
     @IBOutlet weak var timeSpentEntry: UITextField!
-    @IBOutlet weak var menuItemEntry: UITextField!
-    @IBOutlet weak var locationEntry: UITextField!
     @IBOutlet weak var profileImage: UIImageView!
     let photos = PHPhotoLibrary.authorizationStatus()
     let picker = UIImagePickerController()
+    var worker = Worker()
     @IBOutlet weak var taglineEntry: UITextField!
-    @IBOutlet weak var birthdayDatePicker: UIDatePicker!
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         picker.delegate = self
-        employmentEntry.delegate = self
+        occupationEntry.delegate = self
         timeSpentEntry.delegate = self
-        menuItemEntry.delegate = self
-        locationEntry.delegate = self
         taglineEntry.delegate = self
         // Do any additional setup after loading the view.
     }
@@ -46,18 +42,23 @@ class ProfileViewController: UIViewController, UIImagePickerControllerDelegate, 
         textField.resignFirstResponder()
         return true
     }
+    @IBAction func completeProfileTapped(_ sender: Any) {
+        var newWorker = Worker()
+        newWorker.occupation = occupationEntry.text!
+        newWorker.workingSince = timeSpentEntry.text!
+        newWorker.tagline = taglineEntry.text!
+        controller.createNewWorker(worker: worker) { (error, worker) in
+            print(error)
+        }
+    }
     
     @IBAction func controlChanged(_ sender: UISegmentedControl) {
         if(sender.selectedSegmentIndex == 1){
-            employmentEntry.isHidden = true
+            occupationEntry.isHidden = true
             timeSpentEntry.isHidden = true
-            menuItemEntry.isHidden = true
-            locationEntry.isHidden = true
         }else{
-            employmentEntry.isHidden = false
+            occupationEntry.isHidden = false
             timeSpentEntry.isHidden = false
-            menuItemEntry.isHidden = false
-            locationEntry.isHidden = false
         }
     }
     

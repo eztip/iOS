@@ -12,12 +12,9 @@ import Photos
 class SettingsViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     
     
-    @IBOutlet weak var employmentEntry: UITextField!
+    @IBOutlet weak var occupationEntry: UITextField!
     @IBOutlet weak var taglineEntry: UITextField!
     @IBOutlet weak var timeSpentEntry: UITextField!
-    @IBOutlet weak var favoriteItemEntry: UITextField!
-    @IBOutlet weak var locationEntry: UITextField!
-    @IBOutlet weak var birthdayDatePicker: UIDatePicker!
     
     
     let photos = PHPhotoLibrary.authorizationStatus()
@@ -28,12 +25,17 @@ class SettingsViewController: UIViewController, UIImagePickerControllerDelegate,
     override func viewDidLoad() {
         super.viewDidLoad()
         picker.delegate = self
-        employmentEntry.delegate = self
+        occupationEntry.delegate = self
         taglineEntry.delegate = self
         timeSpentEntry.delegate = self
-        favoriteItemEntry.delegate = self
-        locationEntry.delegate = self
+        profileImage.image = controller.currentWorkerImage
+        taglineEntry.text = controller.currentWorker?.tagline
+        timeSpentEntry.text = controller.currentWorker?.workingSince
+        occupationEntry.text = controller.currentWorker?.occupation
         // Do any additional setup after loading the view.
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        
     }
     
     
@@ -48,6 +50,25 @@ class SettingsViewController: UIViewController, UIImagePickerControllerDelegate,
             self.present(alert, animated: true)
         }
         
+    }
+    @IBAction func updateProfileTapped(_ sender: Any) {
+        var newWorker = controller.currentWorker
+        newWorker?.tagline = taglineEntry.text!
+        newWorker?.workingSince = timeSpentEntry.text!
+        newWorker?.occupation = occupationEntry.text!
+        controller.updateProfile(updatedWorker: newWorker!) { (error, worker) in
+            if let error = error{
+                print(error)
+            }
+        }
+        controller.updateWorkerImage(image: profileImage.image!) { (error) in
+            if let error = error{
+                print(error)
+            }
+        }
+        let alert = UIAlertController(title: "Success", message: "Profile updated successfully!", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
+        self.present(alert, animated: true)
     }
     
     

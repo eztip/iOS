@@ -8,12 +8,14 @@
 
 import UIKit
 
+let controller = Controller()
+
 class RecentTipsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     @IBOutlet weak var welcomeLabel: UILabel!
     @IBOutlet weak var smallLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     
-    let controller = Controller()
+    
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -42,7 +44,7 @@ class RecentTipsViewController: UIViewController, UITableViewDelegate, UITableVi
         controller.getTips(token: loggedInToken!) { (error) in
             DispatchQueue.main.async {
                 self.tableView.reloadData()
-                if(self.controller.tipsWithSender.count == 0){
+                if(controller.tipsWithSender.count == 0){
                     self.smallLabel.text = "You currently haven't recieved any tips."
                     self.tableView.isHidden = true
                 }else{
@@ -51,7 +53,9 @@ class RecentTipsViewController: UIViewController, UITableViewDelegate, UITableVi
                 }
             }
         }
-        // Do any additional setup after loading the view.
+        controller.fetchWorkers(token: loggedInToken!) { (error) in
+            print(error)
+        }
     }
     
     

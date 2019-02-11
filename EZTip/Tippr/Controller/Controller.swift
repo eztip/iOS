@@ -17,12 +17,59 @@ class Controller{
     
     var tips : [TipResponse] = []
     var tipsWithSender : [TipWithSender] = []
+    var currentWorkerImage : UIImage?
     var currentWorker : Worker?
     var workers : [Worker]?
     var workersWithImages : [WorkerWithImage] = []
     var wasError : Bool = false
     
     let baseURL : URL = URL(string: "https://eztip.herokuapp.com/")!
+    
+    
+    func updateWorkerImage(image: UIImage, completion: @escaping (Error?) -> Void){
+        let url = baseURL.appendingPathComponent("\(currentWorker?.id ?? 100000)/upload")
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "PUT"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "content-type")
+        urlRequest.addValue(loggedInToken!.token, forHTTPHeaderField: "Authorization")
+        let imageData = image.jpegData(compressionQuality: 0.5)
+        do{
+            urlRequest.httpBody = try JSONEncoder().encode(imageData)
+        }catch{
+            print(error)
+        }
+    }
+    
+    func updateProfile(updatedWorker: Worker, completion: @escaping (Error?, Worker?) -> Void){
+        let url = baseURL.appendingPathComponent("workers/\(currentWorker?.id ?? 100000)")
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "PUT"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "content-type")
+        urlRequest.addValue(loggedInToken!.token, forHTTPHeaderField: "Authorization")
+        
+        do{
+            urlRequest.httpBody = try JSONEncoder().encode(updatedWorker)
+        }catch{
+            print(error)
+        }
+        print("\(urlRequest)")
+        URLSession.shared.dataTask(with: urlRequest) { (data, _, error) in
+            if let error = error{
+                print(error)
+                completion(error, nil)
+                return
+            }
+            if let data = data{
+                do{
+                    self.currentWorker = try JSONDecoder().decode(Worker.self, from: data)
+                }catch{
+                    print(error)
+                }
+            }
+            completion(nil, self.currentWorker)
+        }.resume()
+    }
+    
     
     func fetchImages(completion: @escaping (Error?) -> Void){
         guard let safeWorkers = workers else {return}
@@ -40,6 +87,62 @@ class Controller{
         }
         completion(nil)
     }
+    
+    func fetchCurrentWorkerImage(){
+        guard let currentWorkerURL = currentWorker?.profilePhoto else {return}
+        var data : Data?
+        if(currentWorkerURL.isEmpty){
+            return
+        }
+        do{
+            data = try Data(contentsOf: URL(string: currentWorkerURL)!)
+        }catch{
+            print(error)
+        }
+        guard let safeData = data else {return}
+        currentWorkerImage = UIImage(data: safeData)
+    }
+    
+    func postWorkerImage(image: UIImage, completion: @escaping (Error?) -> Void){
+        let url = baseURL.appendingPathComponent("\(currentWorker?.id ?? 100000)/upload")
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "content-type")
+        let imageData = image.jpegData(compressionQuality: 1)
+        do{
+            urlRequest.httpBody = try JSONEncoder().encode(imageData)
+        }catch{
+            print(error)
+        }
+    }
+    
+    func createNewWorker(worker: Worker, completion: @escaping (Error?, Worker?)-> Void){
+        let url = baseURL.appendingPathComponent("workers")
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.addValue("application/json", forHTTPHeaderField: "content-type")
+        do{
+            urlRequest.httpBody = try JSONEncoder().encode(worker)
+        }catch{
+            print(error)
+        }
+        URLSession.shared.dataTask(with: urlRequest) { (data, _, error) in
+            if let error = error{
+                print(error)
+                completion(error, nil)
+                return
+            }
+            if let data = data{
+                do{
+                    self.currentWorker = try JSONDecoder().decode(Worker.self, from: data)
+                }catch{
+                    print(error)
+                }
+            }
+            completion(nil, self.currentWorker)
+        }.resume()
+    }
+    
     
     func registerUser(user: User, completion: @escaping (Error?, Token?) -> Void){
         let url = baseURL.appendingPathComponent("register")
@@ -222,6 +325,7 @@ class Controller{
                 currentWorker = x
             }
         }
+        self.fetchCurrentWorkerImage()
     }
     
     

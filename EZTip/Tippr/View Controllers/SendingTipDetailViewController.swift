@@ -9,7 +9,6 @@
 import UIKit
 
 class SendingTipDetailViewController: UIViewController {
-    let controller = Controller()
     var tipToSend : String?
     var worker : Worker?
     @IBOutlet weak var tipLabel: UILabel!

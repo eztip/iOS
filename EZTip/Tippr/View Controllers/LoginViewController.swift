@@ -12,8 +12,6 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var usernameEntry: UITextField!
     @IBOutlet weak var passwordEntry: UITextField!
     
-    
-    let controller = Controller()
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = false
@@ -22,7 +20,7 @@ class LoginViewController: UIViewController {
     @IBAction func login(_ sender: Any) {
         controller.loginUser(username: usernameEntry.text!, password: passwordEntry.text!) { (error, token) in
             DispatchQueue.main.async {
-                if self.controller.wasError == true{
+                if controller.wasError == true{
                     let alert = UIAlertController(title: "Error", message: "Incorrect username or password", preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "Okay", style: .default, handler: nil))
                     self.present(alert, animated: true)
